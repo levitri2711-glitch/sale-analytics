@@ -24,7 +24,7 @@ const can=r=>!!ME&&RANK.indexOf(ME.user.role)>=RANK.indexOf(r);
 /* ---------- kho dữ liệu dùng chung ---------- */
 const STORE={since:0,timer:0,queue:[],flushT:0,started:false};
 function applyDocs(list){const touched=new Set();for(const d of list){const c=S.col[d.col];if(!c)continue;if(d.data==null)delete c[d.id];else c[d.id]=d.data;touched.add(d.col);if(d.at>STORE.since)STORE.since=d.at}return touched}
-function setSync(st,t){const el=$('#sync');if(el)el.innerHTML=`<span class="dot ${st}"></span>${esc(t)}`}
+function setSync(st,t){const el=$('#sync');if(el){el.title=t;el.innerHTML=`<span class="dot ${st}"></span><span class="st-t">${esc(t)}</span>`}}
 async function pull(full){
   try{const r=await API.call('pull',{since:full?0:Math.max(0,STORE.since-60000)});const t=applyDocs(r.docs);if(full)STORE.since=Math.max(STORE.since,r.now-60000);if(t.size||full){invalidate();scheduleRender()}setSync('on','Đồng bộ · '+new Date().toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'}))}
   catch(e){setSync('off',e.code==='network'?'Mất kết nối – thử lại sau':'Lỗi đồng bộ')}
@@ -74,8 +74,10 @@ function legalView(key){const g=document.getElementById('legal');g.innerHTML=`<d
 window.addEventListener('hashchange',()=>{const h=location.hash;if(h.startsWith('#/legal/'))legalView(h.slice(8));else document.getElementById('legal').hidden=true});
 
 function banner(){const b=$('#banner');if(!b)return;
-  if(DEMO)b.innerHTML=`<div class="banner warn">Bản demo: dữ liệu mô phỏng, thay đổi chỉ tồn tại trong phiên này. <a href="#" data-act="logout">Đăng nhập</a> để lưu và cộng tác.</div>`;
-  else if(!S.canWrite)b.innerHTML=`<div class="banner">Bạn đang ở chế độ ${can('commenter')?'xem và bình luận':'chỉ xem'}. Liên hệ Editor/Owner để được cấp thêm quyền.</div>`;else b.innerHTML=''}
+  let x=false;try{x=!!sessionStorage.getItem('sa.bx')}catch(_){}const X='<button class="bx" data-act="bannerX" aria-label="Ẩn thông báo">×</button>';
+  if(x)b.innerHTML='';
+  else if(DEMO)b.innerHTML=`<div class="banner warn"><span>Bản demo · thay đổi không được lưu. <a href="#" data-act="logout">Đăng nhập</a> để lưu và cộng tác.</span>${X}</div>`;
+  else if(!S.canWrite)b.innerHTML=`<div class="banner"><span>Bạn đang ${can('commenter')?'xem và bình luận':'chỉ xem'}. Cần thêm quyền? Liên hệ Editor/Owner.</span>${X}</div>`;else b.innerHTML=''}
 
 V.access=()=>{
   const role=ME?ME.user.role:'demo';
@@ -112,8 +114,9 @@ function startApp(){
   if(DEMO){S.mode='demo';S.canWrite=true;S.canAdmin=true;S.canComment=false;S.meId='demo'}
   else{S.mode='live';window.ME=ME;S.meId=ME.user.email;S.canWrite=can('contributor');S.canAdmin=can('editor');S.canComment=can('commenter');connectServer();startStore()}
   const h0=location.hash.slice(1);if(V[h0])S.view=h0;
-  const w=$('#who');if(w)w.innerHTML=(DEMO?'Demo':esc(ME.user.email)+' · '+esc(ME.user.role_label))+` <button class="btn sm ghost" data-act="logout">${DEMO?'Đăng nhập':'Đăng xuất'}</button>`;
-  setSync(DEMO?'off':'on',DEMO?'Demo – không lưu':'Đang tải dữ liệu chung…');
+  const w=$('#who');if(w){const em=DEMO?'':ME.user.email,ini=DEMO?'D':(em[0]||'?').toUpperCase();w.innerHTML=`<details class="acct"><summary aria-label="Tài khoản"><span class="av">${esc(ini)}</span><span class="hide-m">${DEMO?'Demo':esc(ME.user.role_label)}</span></summary><div class="menu" role="menu"><div class="mh">${DEMO?'<b>Bản demo</b><span>Dữ liệu chỉ tồn tại trong phiên này</span>':`<b>${esc(em)}</b><span>${esc(ME.user.role_label)}</span>`}</div><button data-act="go" data-v="access">Chia sẻ & phân quyền</button><button data-act="focus">Chế độ tập trung <kbd>F</kbd></button><a href="#/legal/privacy">Chính sách bảo mật</a><button data-act="logout" class="mx">${DEMO?'Đăng nhập':'Đăng xuất'}</button></div></details>`;
+    document.addEventListener('click',ev=>{const d=w.querySelector('details');if(d&&d.open&&(!d.contains(ev.target)||ev.target.closest('.menu [data-act],.menu a')))d.open=false})}
+  setSync(DEMO?'off':'on',DEMO?'Bản demo':'Đang tải dữ liệu chung…');
   render();tick();setInterval(tick,30000);
   if(!DEMO)pull(true).then(()=>{if(S.view==='access')loadUsers()});
 }

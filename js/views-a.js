@@ -13,12 +13,19 @@ const cLink=id=>`<a href="#" data-act="cust" data-id="${esc(id)}">${esc(custName
 const rLink=id=>`<a href="#" data-act="rep" data-id="${esc(id)}">${esc(repName(id))}</a>`;
 const achCls=a=>a>=1?'ok':a>=.85?'warn':'crit';
 const tierPill=t=>pill(t,t==='Diamond'?'info':t==='Gold'?'warn':t==='Silver'?'mute':'mute');
-function filterBar(extra=''){const f=S.f;return `<div class="filters">
- <label>Kỳ<select data-f="period">${optHtml([['mtd','Tháng này'],['lm','Tháng trước'],['qtd','Quý này'],['ytd','Lũy kế năm'],['l12','12 tháng gần nhất'],['py','Năm trước']],f.period)}</select></label>
- <label>Vùng<select data-f="region"><option value="">Toàn quốc</option>${optHtml(Object.entries(REGIONS),f.region)}</select></label>
- <label>Kênh<select data-f="channel"><option value="">Tất cả kênh</option>${optHtml(Object.entries(CHANNELS),f.channel)}</select></label>
- <label>Nhóm<select data-f="team"><option value="">Tất cả nhóm</option>${optHtml(TEAMS.map(t=>[t.id,t.name]),f.team)}</select></label>${extra}
- <span class="small muted">${esc(M.per.label)} · số liệu đến ${vn(M.T)}</span></div>`}
+function filterBar(extra=''){const f=S.f;
+ const act=[['region',REGIONS[f.region]],['channel',CHANNELS[f.channel]],['team',(TEAMS.find(t=>t.id===f.team)||{}).name]].filter(x=>x[1]);
+ return `<div class="filters">
+ <label class="fper"><span class="sr">Kỳ báo cáo</span><select data-f="period" aria-label="Kỳ báo cáo">${optHtml([['mtd','Tháng này'],['lm','Tháng trước'],['qtd','Quý này'],['ytd','Lũy kế năm'],['l12','12 tháng gần nhất'],['py','Năm trước']],f.period)}</select></label>
+ <button class="btn sm ghost fbtn${act.length?' on':''}" data-act="ftog" aria-expanded="${!!S.fOpen}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"/></svg>Bộ lọc${act.length?` <b>${act.length}</b>`:''}</button>
+ ${act.map(([k,l])=>`<button class="fchip" data-act="fclr" data-k="${k}" title="Bỏ lọc">${esc(l)}<span aria-hidden="true">×</span></button>`).join('')}
+ ${extra?`<span class="fx">${extra}</span>`:''}
+ <span class="fmeta">${esc(M.per.label)}</span>
+ ${S.fOpen?`<div class="fmore">
+  <label>Vùng<select data-f="region"><option value="">Toàn quốc</option>${optHtml(Object.entries(REGIONS),f.region)}</select></label>
+  <label>Kênh<select data-f="channel"><option value="">Tất cả kênh</option>${optHtml(Object.entries(CHANNELS),f.channel)}</select></label>
+  <label>Nhóm<select data-f="team"><option value="">Tất cả nhóm</option>${optHtml(TEAMS.map(t=>[t.id,t.name]),f.team)}</select></label>
+  ${act.length?'<button class="btn sm ghost" data-act="fclr" data-k="all">Xóa lọc</button>':''}</div>`:''}</div>`}
 function last24(){return M.monthsAll.slice(-24)}
 
 V.overview=()=>{

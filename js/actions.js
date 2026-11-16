@@ -1,23 +1,29 @@
 /* Sale Analytics – hành động, form, tự động hóa, xuất Excel, đồng bộ Google Sheets, vòng render. */
 "use strict";
+const TABS=[['overview','Tổng quan','M4 13h6V4H4zM14 20h6v-9h-6zM4 20h6v-4H4zM14 4v4h6V4z'],['orders','Đơn hàng','M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6'],['debt','Công nợ','M3 7h18v10H3zM7 12h.01M12 9.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z'],['pipeline','Pipeline','M4 5h16l-6 7v6l-4 2v-8z'],['more','Menu','M4 7h16M4 12h16M4 17h16']];
+function navOpen(){$('#app').classList.add('nav-open');document.body.style.overflow='hidden';const c=document.querySelector('#nav [aria-current]');if(c)c.scrollIntoView({block:'center'})}
+function navClose(){const a=$('#app');if(a&&a.classList.contains('nav-open')){a.classList.remove('nav-open');document.body.style.overflow=''}}
+function setFocus(on){document.documentElement.classList.toggle('focus',on);try{localStorage.setItem('sa.focus',on?'1':'')}catch(_){}const b=$('#focusBtn');if(b){b.setAttribute('aria-pressed',on);b.title=on?'Thoát chế độ tập trung (phím F)':'Chế độ tập trung (phím F)'}}
+try{if(localStorage.getItem('sa.focus'))document.documentElement.classList.add('focus')}catch(_){}
 function render(){
   build();const v=V[S.view]?S.view:'overview';
   const crit=M.checks.filter(c=>c.sev==='crit').length,openT=M.tasks.filter(t=>t.status!=='done').length,od=M.customers.filter(c=>c.maxOd>60).length;
   const cnt={automation:openT?`<span class="cnt${crit?' hot':''}">${openT}</span>`:'',debt:od?`<span class="cnt hot">${od}</span>`:'',pipeline:`<span class="cnt">${M.openOpps.length}</span>`,contracts:M.contracts.filter(c=>c.status==='Sắp hết hạn').length?`<span class="cnt">${M.contracts.filter(c=>c.status==='Sắp hết hạn').length}</span>`:'',product:M.stock.some(s=>s.status==='Sắp hết hàng')?'<span class="cnt hot">!</span>':''};
   $('#nav').innerHTML=GROUPS.map(([g,l])=>`<div class="ngrp">${l}</div>`+VIEWS.filter(x=>x[2]===g).map(([id,l])=>`<button data-act="go" data-v="${id}"${id===v?' aria-current="page"':''}><span>${l}</span>${cnt[id]||''}</button>`).join('')).join('');
-  $('#vtitle').innerHTML=`<span class="crumb">AMG Việt Nam · Sale Analytics</span>${esc(VIEWS.find(x=>x[0]===v)[1])}`;
+  $('#vtitle').innerHTML=`<span class="crumb">${esc((GROUPS.find(g=>g[0]===VIEWS.find(x=>x[0]===v)[2])||[])[1]||'Sale Analytics')}</span>${esc(VIEWS.find(x=>x[0]===v)[1])}`;
+  const tb=$('#tabbar');if(tb)tb.innerHTML=TABS.map(([id,l,ic])=>`<button data-act="${id==='more'?'navOpen':'go'}" data-v="${id}"${id===v||(id==='more'&&!TABS.some(t=>t[0]===v))?' aria-current="page"':''}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${ic}"/></svg><span>${l}</span>${id!=='more'&&cnt[id]&&/hot/.test(cnt[id])?'<i class="tdot"></i>':''}</button>`).join('');
   const ae=document.activeElement,af=ae&&ae.dataset&&ae.dataset.f,aid=ae&&ae.id,sel=ae&&ae.selectionStart;const sy=window.scrollY;
   $('#view').innerHTML=V[v]();
   const el=af?document.querySelector(`#view [data-f="${af}"]`):aid?document.getElementById(aid):null;if(el&&el.tagName==='INPUT'){el.focus();try{if(sel!=null)el.setSelectionRange(sel,sel)}catch(_){}}
   window.scrollTo(0,sy);if(window.banner)banner();if(v==='contracts'&&S._prev)docPreview();
 }
-function go(v){if(!V[v])v='overview';S.view=v;S.f.page=0;if(location.hash!=='#'+v){try{history.replaceState(null,'','#'+v)}catch(_){location.hash=v}}render();window.scrollTo(0,0);if(window.onGo)onGo(v)}
+function go(v){navClose();if(!V[v])v='overview';S.view=v;S.f.page=0;if(location.hash!=='#'+v){try{history.replaceState(null,'','#'+v)}catch(_){location.hash=v}}render();window.scrollTo(0,0);if(window.onGo)onGo(v)}
 window.addEventListener('hashchange',()=>{const v=location.hash.slice(1);if(V[v]&&v!==S.view){S.view=v;render()}});
 const MODEL_F=['period','region','channel','team','commMonth'];
 document.addEventListener('change',ev=>{const el=ev.target;if(el.dataset&&el.dataset.f){const k=el.dataset.f;S.f[k]=el.value;S.f.page=0;if(MODEL_F.includes(k))invalidate();if(k.startsWith('doc'))S._prev=false;render()}});
 let qT=0;document.addEventListener('input',ev=>{const el=ev.target;if(el.dataset&&el.dataset.f&&el.tagName==='INPUT'){clearTimeout(qT);qT=setTimeout(()=>{S.f[el.dataset.f]=el.value;S.f.page=0;render()},220)}});
 document.addEventListener('click',ev=>{const b=ev.target.closest('[data-act]');if(!b)return;const a=b.dataset.act;if(!ACT[a])return;if(b.tagName==='A'||b.tagName==='BUTTON')ev.preventDefault();if(b.disabled)return;ACT[a](b,ev)});
-document.addEventListener('keydown',ev=>{if(ev.key==='Escape')closeDrawer();if((ev.key==='Enter'||ev.key===' ')&&ev.target.getAttribute&&ev.target.getAttribute('role')==='button'){ev.preventDefault();ev.target.click()}});
+document.addEventListener('keydown',ev=>{if(ev.key==='Escape'){closeDrawer();navClose()}const tg=ev.target,typing=tg&&(/INPUT|SELECT|TEXTAREA/.test(tg.tagName)||tg.isContentEditable);if(!typing&&!ev.metaKey&&!ev.ctrlKey&&!ev.altKey&&(ev.key==='f'||ev.key==='F')&&$('#drawerWrap').hidden){ev.preventDefault();setFocus(!document.documentElement.classList.contains('focus'))}if((ev.key==='Enter'||ev.key===' ')&&ev.target.getAttribute&&ev.target.getAttribute('role')==='button'){ev.preventDefault();ev.target.click()}});
 function tick(){const n=new Date();const c=$('#clock');if(c)c.textContent=n.toLocaleDateString('vi-VN',{weekday:'short',day:'2-digit',month:'2-digit',year:'numeric'})+' · '+n.toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'});
   if(G&&G.asOf!==iso(realToday())){invalidate();render();toast('Sang ngày mới: dữ liệu, tuổi nợ, thuế suất đã cập nhật đến '+vn(realToday()))}}
 
@@ -147,7 +153,7 @@ function printHtml(html){const w=window.open('','_blank');if(!w){toast('Trình d
 
 /* ---------- bảng hành động ---------- */
 const ACT={
- go:b=>go(b.dataset.v),close:()=>closeDrawer(),page:b=>{S.f.page=+b.dataset.p;render()},setF:b=>{S.f[b.dataset.k]=b.dataset.v;render()},
+ go:b=>go(b.dataset.v),close:()=>closeDrawer(),navOpen:()=>navOpen(),navClose:()=>navClose(),focus:()=>setFocus(!document.documentElement.classList.contains('focus')),ftog:()=>{S.fOpen=!S.fOpen;render()},fclr:b=>{const k=b.dataset.k;(k==='all'?['region','channel','team']:[k]).forEach(x=>S.f[x]='');S.f.page=0;invalidate();render()},bannerX:()=>{try{sessionStorage.setItem('sa.bx','1')}catch(_){}$('#banner').innerHTML=''},page:b=>{S.f.page=+b.dataset.p;render()},setF:b=>{S.f[b.dataset.k]=b.dataset.v;render()},
  cust:b=>custDrawer(b.dataset.id),rep:b=>repDrawer(b.dataset.id),order:b=>orderDrawer(b.dataset.id),opp:b=>oppDrawer(b.dataset.id),contract:b=>contractDrawer(b.dataset.id),
  comment:b=>{const p=b.closest('.panel');const h=p&&p.querySelector('h3');if(window.openComments)openComments(S.view+'|'+(h?h.textContent:'Trang'))},
  xlsx:b=>{try{exportXlsx(b.dataset.k);toast('Đã tạo file Excel')}catch(e){toast('Không xuất được: '+e.message)}},

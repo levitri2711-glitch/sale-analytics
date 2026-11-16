@@ -5,6 +5,7 @@ Web app phân tích và vận hành bán hàng cho **khối Kinh doanh AMG Việ
 App gom toàn bộ kiến thức trong thư mục `SALE SYSTEM`: 65 file Excel thuộc 9 bộ tài liệu, các ebook (6M, quy trình B2B 7 bước, SPIN, Challenger, FAB, CAC/CLV, kênh phân phối, 5A, 4P, CEO Playbook, ACTMAP) và các biên bản công nợ.
 
 - **Chi phí:** 0 đ. App chạy trên GitHub Pages + Google Apps Script + Google Sheets + Gmail của Owner, không dùng thư viện, phông chữ, phân tích hay AI trả phí.
+- **Ứng dụng:** https://levitri2711-glitch.github.io/sale-analytics/
 - **Chạy thử trên máy:** `npm run dev` → http://localhost:8790/?demo (bản demo), http://localhost:8790/dev (đăng nhập thử từng vai).
 
 ## 18 màn hình
