@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://script.google.com https://script.googleusercontent.com; base-uri 'self'; form-action 'self' https://script.google.com">
+<title>Sale Analytics</title>
+<meta name="description" content="Phân tích & quản trị bán hàng AMG Việt Nam: dashboard, công nợ, KPI, pipeline, hợp đồng, Excel – dữ liệu mô phỏng, phân quyền theo email.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="app.css">
+<link rel="stylesheet" href="sale.css">
+</head>
+<body>
+<div id="gate" hidden></div>
+<div id="legal" hidden></div>
+<div class="app">
+  <aside class="side">
+    <div class="brand"><div class="mark">SA</div><div><b>Sale Analytics</b><small>AMG Việt Nam · khối Kinh doanh</small></div></div>
+    <nav id="nav" aria-label="Mô-đun"></nav>
+    <div class="foot">Tập đoàn giả định <b>Aurora Meridian Group Việt Nam</b>. Khách hàng, nhân viên, số liệu là dữ liệu mô phỏng; tham số pháp lý cần đối chiếu văn bản gốc. <a href="#/legal/privacy">Bảo mật</a> · <a href="#/legal/terms">Điều khoản</a></div>
+  </aside>
+  <main>
+    <div class="top">
+      <h1 id="vtitle"><span class="crumb">AMG Việt Nam</span>Tổng quan</h1>
+      <span class="chip" id="clock">—</span>
+      <span class="chip" id="sync"><span class="dot"></span>Đang kết nối</span>
+      <span class="chip" id="who">Khách</span>
+    </div>
+    <div id="banner"></div>
+    <div id="view"><p class="muted" style="padding:24px">Đang dựng dữ liệu bán hàng…</p></div>
+  </main>
+</div>
+<div id="drawerWrap" hidden><div class="drawer-bg" data-act="close"></div><aside class="drawer" id="drawer" role="dialog" aria-modal="true"></aside></div>
+<div class="toast" id="toast" hidden></div>
+<script src="config.js"></script>
+<script src="js/core.js"></script>
+<script src="js/data.js"></script>
+<script src="js/views-a.js"></script>
+<script src="js/views-b.js"></script>
+<script src="js/views-c.js"></script>
+<script src="js/docs.js"></script>
+<script src="js/xlsx.js"></script>
+<script src="js/actions.js"></script>
+<script src="js/legal.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
