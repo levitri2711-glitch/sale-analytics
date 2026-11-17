@@ -284,3 +284,5 @@ html.focus #focusBtn{background:var(--accent-soft);color:var(--accent)}
 .tabbar button[aria-current="page"] svg{stroke-width:2.2}
 .filters label{white-space:nowrap}
 @media (max-width:900px){.fx label{display:flex;align-items:center;gap:8px}.fx label select,.fx label input{flex:1;min-width:0}}
+.side .foot .peer{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding:8px 10px;border:1px solid rgba(255,255,255,.12);border-radius:9px;color:var(--side-ink);text-decoration:none;font-weight:500;font-size:12.5px}
+.side .foot .peer:hover{background:var(--side-hi)}

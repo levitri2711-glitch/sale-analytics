@@ -100,7 +100,7 @@ const num=id=>+String(val(id)).replace(/[^\d.-]/g,'')||0;
 function mdLite(s){return esc(s).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/\n/g,'<br>')}
 
 /* ---------- trạng thái ---------- */
-const COLS=['customers','orders','payments','opps','visits','contracts','docs','tasks','runs','audit','stock','campaigns','forecasts','commission','tickets','targets','settings','policyHistory','pricing'];
+const COLS=['customers','orders','payments','opps','visits','contracts','docs','tasks','runs','audit','stock','campaigns','forecasts','commission','tickets','targets','settings','policyHistory','pricing','bridge'];
 const S={view:'overview',col:Object.fromEntries(COLS.map(c=>[c,{}])),canWrite:true,canAdmin:true,canComment:false,mode:'demo',meId:null,
   f:{period:'ytd',region:'',channel:'',team:'',q:'',page:0,debtBucket:'',debtQ:'',orderQ:'',orderSt:'',oppStage:'',custQ:'',custTier:'',docType:'contract',docRef:'',kpiMonth:'',commMonth:'',excel:'',tip:'all',legal:'all'},
   sheet:{busy:'',msg:''},busy:''};
