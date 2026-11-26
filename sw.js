@@ -1,5 +1,5 @@
 // Service worker: lưu giao diện để mở khi mất mạng; không lưu dữ liệu gọi máy chủ.
-const VERSION = 'sa-shell-v4';
+const VERSION = 'sa-shell-v5';
 const SHELL = ['./', 'index.html', 'app.css', 'sale.css', 'config.js', 'icon.svg', 'manifest.webmanifest', 'js/core.js', 'js/data.js', 'js/views-a.js', 'js/views-b.js', 'js/views-c.js', 'js/docs.js', 'js/xlsx.js', 'js/actions.js', 'js/bridge.js', 'js/legal.js', 'js/app.js'];
 self.addEventListener('install', (e) => { e.waitUntil(caches.open(VERSION).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', (e) => { e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k !== VERSION).map((k) => caches.delete(k)))).then(() => self.clients.claim())); });
