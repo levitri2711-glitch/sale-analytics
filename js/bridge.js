@@ -2,7 +2,7 @@
    Sale gửi: sale.perf (hiệu suất & hoa hồng tháng đã chốt), sale.hiring (nhu cầu tuyển sales).
    Sale nhận: hr.roster (nhân sự khối Kinh doanh: người mới, thử việc, nghỉ việc) → tạo việc hội nhập/bàn giao.
    Dữ liệu đi qua máy chủ của chính Owner (tab AMG_Bridge trong file CSDL riêng tư); không dùng dịch vụ bên ngoài. */
-const PEER_HR=(window.APP_CONFIG&&APP_CONFIG.PEER_HR)||'https://levitri2711-glitch.github.io/hr-talent-studio/';
+const PEER_HR=(window.APP_CONFIG&&APP_CONFIG.PEER_HR)||'https://levitri2711-glitch.github.io/hr-analytics/';
 const BR={status:null,loading:false};
 const brLive=()=>typeof API!=='undefined'&&!!API.session&&!(typeof DEMO!=='undefined'&&DEMO);
 const hrLink=(view,label)=>`<a href="${PEER_HR}${view?'#'+view:''}" target="_blank" rel="noopener">${label||'HR Analytics'} ↗</a>`;
