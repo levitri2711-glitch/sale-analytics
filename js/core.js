@@ -56,8 +56,8 @@ function hbars(items,{f=fmt,color='var(--c1)',max,act}={}){
   const mx=max||Math.max(1,...items.map(i=>Math.abs(i.v)));
   return `<div class="bars">${items.map(i=>`<div class="bar"${act&&i.id?` data-act="${act}" data-id="${esc(i.id)}" role="button" tabindex="0" style="cursor:pointer"`:''}><span class="lb" title="${esc(i.l)}">${esc(i.l)}</span><span class="tr"><span class="fl" style="width:${clamp(Math.abs(i.v)/mx*100,0,100).toFixed(1)}%;background:${i.c||color}"></span>${i.mark!=null?`<span class="mk" style="left:${clamp(i.mark/mx*100,0,100).toFixed(1)}%"></span>`:''}</span><span class="vl">${f(i.v)}</span></div>`).join('')}</div>`;
 }
-function colChart(labels,series,{h=230,f=v=>fmtA(v),line,stack}={}){
-  const W=660,H=h,pl=54,pr=10,pt=12,pb=26;
+function colChart(labels,series,{h=230,f=v=>fmtA(v),line,stack,w=660}={}){
+  const W=w,H=h,pl=54,pr=10,pt=12,pb=26;
   const tops=stack?labels.map((_,i)=>sum(series,s=>s.values[i]||0)):series.flatMap(s=>s.values.filter(v=>v!=null));
   const max=niceMax(Math.max(1,...tops,...(line?line.values.filter(v=>v!=null):[])));
   let g='';for(let i=0;i<=4;i++){const y=pt+(H-pt-pb)*(1-i/4);g+=`<line class="grid" x1="${pl}" x2="${W-pr}" y1="${y}" y2="${y}"/><text class="tick" x="${pl-6}" y="${y+4}" text-anchor="end">${esc(f(max*i/4))}</text>`}
@@ -67,7 +67,7 @@ function colChart(labels,series,{h=230,f=v=>fmtA(v),line,stack}={}){
   if(line){const pts=line.values.map((v,i)=>v==null?null:[pl+i*bw+bw/2,H-pb-(H-pt-pb)*v/max]).filter(Boolean);
     g+=`<polyline fill="none" style="stroke:${line.c}" stroke-width="2" ${line.dash?'stroke-dasharray="5 4"':''} points="${pts.map(p=>p.map(n=>n.toFixed(1)).join(',')).join(' ')}"/>`+pts.map((p,i)=>`<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="${i===pts.length-1?4:2.5}" style="fill:${line.c}"><title>${esc(line.n)} ${esc(labels[i]||'')}: ${esc(f(line.values[i]))}</title></circle>`).join('')}
   const leg=[...series.map(s=>[s.n,s.c]),...(line?[[line.n,line.c]]:[])];
-  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(leg.map(x=>x[0]).join(', '))}">${g}</svg><div class="legend">${leg.map(([n,c])=>`<span><i style="background:${c}"></i>${esc(n)}</span>`).join('')}</div>`;
+  return `<svg class="chart cc" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(leg.map(x=>x[0]).join(', '))}">${g}</svg><div class="legend">${leg.map(([n,c])=>`<span><i style="background:${c}"></i>${esc(n)}</span>`).join('')}</div>`;
 }
 function donut(items,center,{f=fmt,unit='tổng'}={}){
   const tot=sum(items,i=>i.v)||1,r=56,C=2*Math.PI*r;let off=0;
@@ -106,6 +106,12 @@ const S={view:'overview',col:Object.fromEntries(COLS.map(c=>[c,{}])),canWrite:tr
   sheet:{busy:'',msg:''},busy:''};
 let renderT=0;function scheduleRender(){clearTimeout(renderT);renderT=setTimeout(()=>{if(window.render)render()},30)}
 
+/* ---------- phân trang dùng chung: paged(list,'key') rồi pgBar('key') ngay sau bảng ---------- */
+const PG_SIZE=25;S.pg={};S._pgb={};
+function paged(list,key,size=PG_SIZE){const pages=Math.max(1,Math.ceil(list.length/size)),p=clamp(S.pg[key]||0,0,pages-1);S.pg[key]=p;
+  S._pgb[key]=list.length>size?`<div class="pager"><span class="small muted">${fmt(p*size+1)}–${fmt(Math.min(list.length,(p+1)*size))} / ${fmt(list.length)}</span><button class="btn sm" data-act="pg" data-k="${key}" data-p="${p-1}"${p<=0?' disabled':''}>‹ Trước</button><button class="btn sm" data-act="pg" data-k="${key}" data-p="${p+1}"${p>=pages-1?' disabled':''}>Sau ›</button></div>`:'';
+  return list.slice(p*size,(p+1)*size)}
+const pgBar=key=>S._pgb[key]||'';
 /* ---------- ghi dữ liệu (app.js nối với máy chủ; bản demo chỉ giữ trong phiên) ---------- */
 const WRITER={set:null,del:null};
 async function put(col,id,data){

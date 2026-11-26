@@ -144,7 +144,7 @@ nav button[aria-current="page"]{opacity:1;background:var(--side-hi);box-shadow:i
 
 /* --- Header dính, gọn --- */
 main{padding-bottom:56px}
-#view{max-width:1480px}
+#view{max-width:none}
 .top{position:sticky;top:0;z-index:20;margin:0 0 16px;padding-block:12px;min-height:var(--topH);flex-wrap:nowrap;gap:10px;
   background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:saturate(1.4) blur(10px);-webkit-backdrop-filter:saturate(1.4) blur(10px)}
 .top h1{font-size:20px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.25}
@@ -187,7 +187,7 @@ kbd{font:500 11px var(--f-mono);border:1px solid var(--line);border-radius:4px;p
 .filters label{gap:6px}
 
 /* --- KPI: sạch, phân cấp rõ --- */
-.kpis{grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:18px}
+.kpis{grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:12px;margin-bottom:18px}
 .kpi{border-radius:var(--r);padding:14px 16px;gap:4px;transition:border-color .15s}
 .kpi[data-act]:hover{border-color:var(--accent)}
 .kpi .l{font-size:12px;font-weight:500}
@@ -286,3 +286,22 @@ html.focus #focusBtn{background:var(--accent-soft);color:var(--accent)}
 @media (max-width:900px){.fx label{display:flex;align-items:center;gap:8px}.fx label select,.fx label input{flex:1;min-width:0}}
 .side .foot .peer{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding:8px 10px;border:1px solid rgba(255,255,255,.12);border-radius:9px;color:var(--side-ink);text-decoration:none;font-weight:500;font-size:12.5px}
 .side .foot .peer:hover{background:var(--side-hi)}
+
+/* ===== UX v3: sửa lỗi hiển thị trên màn rộng ===== */
+.bar .fl{display:block;height:100%;min-width:2px;border-radius:3px}
+.bar .tr{display:block}
+svg.cc .tick{font-size:var(--tick,10.5px)}
+svg.cc{overflow:visible}
+/* Khung trong lưới cao theo nội dung của chính nó (không kéo giãn thành khối rỗng) */
+.grid{align-items:start}
+.flowwrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+@media (max-width:900px){
+  .flowwrap svg{min-width:640px}
+  .tw .tbl td:first-child,.tw .tbl th:first-child{min-width:128px;max-width:180px}
+}
+/* Thanh tiến độ: là span nội dòng nên cần inline-block mới hiện; màu theo mức */
+.prog{display:inline-block;vertical-align:middle;width:72px;min-width:48px;height:6px}
+td .prog{margin-right:6px}
+.prog.ok i{background:var(--ok)}.prog.warn i{background:var(--warn)}.prog.crit i{background:var(--crit)}
+.kr .prog{width:auto;display:block}
+@media (min-width:901px){.kpis:has(>:nth-child(8):last-child){grid-template-columns:repeat(4,minmax(0,1fr))}}

@@ -5,6 +5,9 @@ function navOpen(){$('#app').classList.add('nav-open');document.body.style.overf
 function navClose(){const a=$('#app');if(a&&a.classList.contains('nav-open')){a.classList.remove('nav-open');document.body.style.overflow=''}}
 function setFocus(on){document.documentElement.classList.toggle('focus',on);try{localStorage.setItem('sa.focus',on?'1':'')}catch(_){}const b=$('#focusBtn');if(b){b.setAttribute('aria-pressed',on);b.title=on?'Thoát chế độ tập trung (phím F)':'Chế độ tập trung (phím F)'}}
 try{if(localStorage.getItem('sa.focus'))document.documentElement.classList.add('focus')}catch(_){}
+// Giữ cỡ chữ trục biểu đồ ≥ ~9px khi biểu đồ bị thu nhỏ trong khung hẹp
+function fitCharts(){document.querySelectorAll('#view svg.cc').forEach(s=>{const vb=s.viewBox.baseVal,w=s.getBoundingClientRect().width;if(!vb||!vb.width||!w)return;const sc=w/vb.width;s.style.setProperty('--tick',Math.max(10.5,Math.min(17,9.5/sc)).toFixed(1)+'px')})}
+let rzT=0;window.addEventListener('resize',()=>{clearTimeout(rzT);rzT=setTimeout(fitCharts,120)});
 function render(){
   build();const v=V[S.view]?S.view:'overview';
   const crit=M.checks.filter(c=>c.sev==='crit').length,openT=M.tasks.filter(t=>t.status!=='done').length,od=M.customers.filter(c=>c.maxOd>60).length;
@@ -15,13 +18,13 @@ function render(){
   const ae=document.activeElement,af=ae&&ae.dataset&&ae.dataset.f,aid=ae&&ae.id,sel=ae&&ae.selectionStart;const sy=window.scrollY;
   $('#view').innerHTML=V[v]();
   const el=af?document.querySelector(`#view [data-f="${af}"]`):aid?document.getElementById(aid):null;if(el&&el.tagName==='INPUT'){el.focus();try{if(sel!=null)el.setSelectionRange(sel,sel)}catch(_){}}
-  window.scrollTo(0,sy);if(window.banner)banner();if(v==='contracts'&&S._prev)docPreview();
+  window.scrollTo(0,sy);fitCharts();if(window.banner)banner();if(v==='contracts'&&S._prev)docPreview();
 }
-function go(v){navClose();if(!V[v])v='overview';S.view=v;S.f.page=0;if(location.hash!=='#'+v){try{history.replaceState(null,'','#'+v)}catch(_){location.hash=v}}render();window.scrollTo(0,0);if(window.onGo)onGo(v)}
+function go(v){navClose();if(!V[v])v='overview';S.view=v;S.f.page=0;S.pg={};if(location.hash!=='#'+v){try{history.replaceState(null,'','#'+v)}catch(_){location.hash=v}}render();window.scrollTo(0,0);if(window.onGo)onGo(v)}
 window.addEventListener('hashchange',()=>{const v=location.hash.slice(1);if(V[v]&&v!==S.view){S.view=v;render()}});
 const MODEL_F=['period','region','channel','team','commMonth'];
-document.addEventListener('change',ev=>{const el=ev.target;if(el.dataset&&el.dataset.f){const k=el.dataset.f;S.f[k]=el.value;S.f.page=0;if(MODEL_F.includes(k))invalidate();if(k.startsWith('doc'))S._prev=false;render()}});
-let qT=0;document.addEventListener('input',ev=>{const el=ev.target;if(el.dataset&&el.dataset.f&&el.tagName==='INPUT'){clearTimeout(qT);qT=setTimeout(()=>{S.f[el.dataset.f]=el.value;S.f.page=0;render()},220)}});
+document.addEventListener('change',ev=>{const el=ev.target;if(el.dataset&&el.dataset.f){const k=el.dataset.f;S.f[k]=el.value;S.f.page=0;S.pg={};if(MODEL_F.includes(k))invalidate();if(k.startsWith('doc'))S._prev=false;render()}});
+let qT=0;document.addEventListener('input',ev=>{const el=ev.target;if(el.dataset&&el.dataset.f&&el.tagName==='INPUT'){clearTimeout(qT);qT=setTimeout(()=>{S.f[el.dataset.f]=el.value;S.f.page=0;S.pg={};render()},220)}});
 document.addEventListener('click',ev=>{const b=ev.target.closest('[data-act]');if(!b)return;const a=b.dataset.act;if(!ACT[a])return;if(b.tagName==='A'||b.tagName==='BUTTON')ev.preventDefault();if(b.disabled)return;ACT[a](b,ev)});
 document.addEventListener('keydown',ev=>{if(ev.key==='Escape'){closeDrawer();navClose()}const tg=ev.target,typing=tg&&(/INPUT|SELECT|TEXTAREA/.test(tg.tagName)||tg.isContentEditable);if(!typing&&!ev.metaKey&&!ev.ctrlKey&&!ev.altKey&&(ev.key==='f'||ev.key==='F')&&$('#drawerWrap').hidden){ev.preventDefault();setFocus(!document.documentElement.classList.contains('focus'))}if((ev.key==='Enter'||ev.key===' ')&&ev.target.getAttribute&&ev.target.getAttribute('role')==='button'){ev.preventDefault();ev.target.click()}});
 function tick(){const n=new Date();const c=$('#clock');if(c)c.textContent=n.toLocaleDateString('vi-VN',{weekday:'short',day:'2-digit',month:'2-digit',year:'numeric'})+' · '+n.toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'});
@@ -153,7 +156,7 @@ function printHtml(html){const w=window.open('','_blank');if(!w){toast('Trình d
 
 /* ---------- bảng hành động ---------- */
 const ACT={
- go:b=>go(b.dataset.v),close:()=>closeDrawer(),navOpen:()=>navOpen(),navClose:()=>navClose(),focus:()=>setFocus(!document.documentElement.classList.contains('focus')),ftog:()=>{S.fOpen=!S.fOpen;render()},fclr:b=>{const k=b.dataset.k;(k==='all'?['region','channel','team']:[k]).forEach(x=>S.f[x]='');S.f.page=0;invalidate();render()},bannerX:()=>{try{sessionStorage.setItem('sa.bx','1')}catch(_){}$('#banner').innerHTML=''},page:b=>{S.f.page=+b.dataset.p;render()},setF:b=>{S.f[b.dataset.k]=b.dataset.v;render()},
+ go:b=>go(b.dataset.v),close:()=>closeDrawer(),navOpen:()=>navOpen(),navClose:()=>navClose(),focus:()=>setFocus(!document.documentElement.classList.contains('focus')),ftog:()=>{S.fOpen=!S.fOpen;render()},fclr:b=>{const k=b.dataset.k;(k==='all'?['region','channel','team']:[k]).forEach(x=>S.f[x]='');S.f.page=0;S.pg={};invalidate();render()},bannerX:()=>{try{sessionStorage.setItem('sa.bx','1')}catch(_){}$('#banner').innerHTML=''},page:b=>{S.f.page=+b.dataset.p;render()},setF:b=>{S.f[b.dataset.k]=b.dataset.v;render()},pg:b=>{const k=b.dataset.k;S.pg[k]=+b.dataset.p;render();const n=document.querySelector(`#view [data-act="pg"][data-k="${k}"]`),t=n&&n.closest('.panel');if(t){const y=t.getBoundingClientRect().top+scrollY-((document.querySelector('.top')||{}).offsetHeight||0)-8;window.scrollTo({top:y,behavior:'smooth'})}},
  cust:b=>custDrawer(b.dataset.id),rep:b=>repDrawer(b.dataset.id),order:b=>orderDrawer(b.dataset.id),opp:b=>oppDrawer(b.dataset.id),contract:b=>contractDrawer(b.dataset.id),
  comment:b=>{const p=b.closest('.panel');const h=p&&p.querySelector('h3');if(window.openComments)openComments(S.view+'|'+(h?h.textContent:'Trang'))},
  xlsx:b=>{try{exportXlsx(b.dataset.k);toast('Đã tạo file Excel')}catch(e){toast('Không xuất được: '+e.message)}},
